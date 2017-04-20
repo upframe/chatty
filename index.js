@@ -12,7 +12,7 @@ RtmClient.prototype.sendThread = function (txt, channel, thread, callback) {
   }, callback)
 }
 
-String.prototype.replaceAt = (index, replacement) => {
+String.prototype.replaceAt = function (index, replacement) {
   return this.substr(0, index) + replacement + this.substr(index + replacement.length)
 }
 
