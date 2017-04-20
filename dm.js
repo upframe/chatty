@@ -1,3 +1,5 @@
+var http = require('http');
+
 function pingPong (text) {
   let answer = 'pong'
 
@@ -14,6 +16,29 @@ function pingPong (text) {
   return answer
 }
 
+function makeFunOfUser(fname, lname) {
+  let options = {
+    host: "api.icndb.com",
+    path: "/jokes/randomFirstName=" + fname + "&lastName=" + lname
+  }
+
+  callback = function(response) {
+    let str = ''
+
+    response.on('data', function (obj) {
+      str += obj
+    });
+
+    response.on('end', function() {
+      obj = JSON.parse(str)
+    })
+  }
+
+  http.request(options, callback).end();
+
+  return "Eu sou Fábio"
+}
+
 module.exports = (message, users) => {
   let answer = ''
 
@@ -23,7 +48,8 @@ module.exports = (message, users) => {
       answer = pingPong(message.text)
       break
     case 'tell me a joke':
-      answer = "I'm not fully grown up yet! Sorry :anguished:"
+      //answer = "I'm not fully grown up yet! Sorry :anguished:"
+      answer = makeFunOfUser(users[message.user].first_name, users[message.user].last_name)
       break
     default:
       answer = `Sorry ${users[message.user].first_name}, I didn't quite understand what you just said :disappointed:`
