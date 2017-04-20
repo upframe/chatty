@@ -1,59 +1,68 @@
-var http = require('http');
+var http = require('http')
+var rtm = null
+var users = null
 
-function pingPong (text) {
+function pingPong (message) {
   let answer = 'pong'
 
-  if (text.toLowerCase() === 'pong') {
+  if (message.text.toLowerCase() === 'pong') {
     answer = 'ping'
   }
 
   for (let i = 0; i < 4; i++) {
-    if (text.charAt(i) === text.charAt(i).toUpperCase()) {
+    if (message.text.charAt(i) === message.text.charAt(i).toUpperCase()) {
       answer = answer.replaceAt(i, answer.charAt(i).toUpperCase())
     }
   }
 
-  return answer
+  rtm.sendMessage(answer, message.channel)
 }
 
-function makeFunOfUser(fname, lname) {
+function makeFunOfUser (message) {
+  let fname = users[message.user].first_name
+  let lname = users[message.user].last_name
+
   let options = {
-    host: "api.icndb.com",
-    path: "/jokes/randomFirstName=" + fname + "&lastName=" + lname
+    host: 'api.icndb.com',
+    path: '/jokes/random?FirstName=' + fname + '&lastName=' + lname
   }
 
-  callback = function(response) {
+  let callback = function (response) {
     let str = ''
 
     response.on('data', function (obj) {
       str += obj
-    });
+    })
 
-    response.on('end', function() {
-      obj = JSON.parse(str)
+    response.on('end', function () {
+      let obj = JSON.parse(str)
+      rtm.sendMessage(obj.value.joke, message.channel)
     })
   }
 
-  http.request(options, callback).end();
-
-  return "Eu sou Fábio"
+  http.request(options, callback).end()
 }
 
-module.exports = (message, users) => {
-  let answer = ''
-
+function handler (message) {
   switch (message.text.toLowerCase()) {
     case 'ping':
     case 'pong':
-      answer = pingPong(message.text)
+      pingPong(message)
       break
     case 'tell me a joke':
-      //answer = "I'm not fully grown up yet! Sorry :anguished:"
-      answer = makeFunOfUser(users[message.user].first_name, users[message.user].last_name)
+      makeFunOfUser(message)
       break
     default:
-      answer = `Sorry ${users[message.user].first_name}, I didn't quite understand what you just said :disappointed:`
+      rtm.sendMessage(`Sorry ${users[message.user].first_name}, I didn't quite understand what you just said :disappointed:`, message.channel)
   }
+}
 
-  return answer
+module.exports = {
+  init: (r, u) => {
+    rtm = r
+    users = u
+  },
+  answer: message => {
+    handler(message)
+  }
 }

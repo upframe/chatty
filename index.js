@@ -1,6 +1,7 @@
 const CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS
 const RTM_EVENTS = require('@slack/client').RTM_EVENTS
 var RtmClient = require('@slack/client').RtmClient
+var dm = require('./dm')
 
 RtmClient.prototype.sendThread = function (txt, channel, thread, callback) {
   this.send({
@@ -29,6 +30,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
   console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}.`)
   bot = rtmStartData.self.ID
   require('./chat')(rtm, bot)
+  dm.init(rtm, users)
 })
 
 rtm.on(RTM_EVENTS.MESSAGE, (message) => {
@@ -42,8 +44,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message) => {
 
   // Direct messages! Fuck yeah!
   if (message.channel.startsWith('D')) {
-    let answer = require('./dm')(message, users)
-    rtm.sendMessage(answer, message.channel)
+    dm.answer(message)
   }
 })
 
