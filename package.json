@@ -1,13 +1,13 @@
 {
-  "name": "upbot",
+  "name": "upframy",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@slack/client": "^3.9.0",
     "ws": "^2.2.3"
