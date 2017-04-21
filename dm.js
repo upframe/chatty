@@ -3,28 +3,37 @@ var rtm = null
 var users = null
 
 function pingPong (message) {
-  let answer = 'pong'
+  let answer = message.text
+  let replacement = null
 
-  if (message.text.toLowerCase() === 'pong') {
-    answer = 'ping'
+  switch (answer.charAt(1)) {
+    case 'I':
+      replacement = 'O'
+      break
+    case 'i':
+      replacement = 'o'
+      break
+    case 'O':
+      replacement = 'I'
+      break
+    case 'o':
+      replacement = 'i'
+      break
+    default:
+      // Wut, what? This must not happen!
   }
 
-  for (let i = 0; i < 4; i++) {
-    if (message.text.charAt(i) === message.text.charAt(i).toUpperCase()) {
-      answer = answer.replaceAt(i, answer.charAt(i).toUpperCase())
-    }
-  }
-
+  answer = answer.substr(0, 1) + replacement + answer.substr(2)
   rtm.sendMessage(answer, message.channel)
 }
 
 function makeFunOfUser (message) {
-  let fname = users[message.user].first_name
-  let lname = users[message.user].last_name
+  let fname = encodeURIComponent(users[message.user].first_name)
+  let lname = encodeURIComponent(users[message.user].last_name)
 
   let options = {
     host: 'api.icndb.com',
-    path: '/jokes/random?FirstName=' + fname + '&lastName=' + lname
+    path: `/jokes/random?escape=javascript&firstName=${fname}&lastName=${lname}`
   }
 
   let callback = function (response) {
@@ -43,14 +52,24 @@ function makeFunOfUser (message) {
   http.request(options, callback).end()
 }
 
-function handler (message) {
+function answer (message) {
   switch (message.text.toLowerCase()) {
+    case 'hey':
+    case 'hi':
+    case 'Hello':
+      rtm.sendMessage('Hi there!', message.channel)
+      break
     case 'ping':
     case 'pong':
       pingPong(message)
       break
     case 'tell me a joke':
       makeFunOfUser(message)
+      break
+    case 'bye':
+    case 'goodbye':
+    case 'cya':
+      rtm.sendMessage('Bye! Gonna miss you :kissing:', message.channel)
       break
     default:
       rtm.sendMessage(`Sorry ${users[message.user].first_name}, I didn't quite understand what you just said :disappointed:`, message.channel)
@@ -62,7 +81,5 @@ module.exports = {
     rtm = r
     users = u
   },
-  answer: message => {
-    handler(message)
-  }
+  answer: answer
 }

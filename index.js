@@ -12,14 +12,9 @@ RtmClient.prototype.sendThread = function (txt, channel, thread, callback) {
   }, callback)
 }
 
-String.prototype.replaceAt = function (index, replacement) {
-  return this.substr(0, index) + replacement + this.substr(index + replacement.length)
-}
-
 var rtm = new RtmClient(process.env.SLACK_BOT_TOKEN)
 var bot = null
 var users = {}
-var firstMessage = false
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
   for (let user of rtmStartData.users) {
@@ -27,24 +22,28 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
     users[user.id] = user.profile
   }
 
-  console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}.`)
-  bot = rtmStartData.self.ID
+  bot = rtmStartData.self.id
   require('./chat')(rtm, bot)
   dm.init(rtm, users)
+  console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}.`)
 })
 
 rtm.on(RTM_EVENTS.MESSAGE, (message) => {
   if (message.user === bot) return
-
-  if (!firstMessage) {
-    // TODO: INVESTIGAR ISTO
-    firstMessage = true
-    return
-  }
+  if (message.hasOwnProperty('subtype')) return
 
   // Direct messages! Fuck yeah!
   if (message.channel.startsWith('D')) {
     dm.answer(message)
+  }
+
+  if (message.text.includes(`<@${bot}>`)) {
+    rtm.sendMessage(
+        `If you mention me again, I will break your nose <@${message.user}>! DM me if you wanna chat.`,
+        message.channel
+    )
+
+    return
   }
 })
 

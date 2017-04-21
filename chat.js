@@ -29,6 +29,7 @@ function handleSocket (conn) {
   })
 
   conn.on('close', function open () {
+    if (thread == null) return
     rtm.sendThread('*My fan just went offline.*', channel, thread, errorHandler)
     delete threads[thread]
   })
@@ -47,7 +48,7 @@ module.exports = (r, i) => {
   rtm = r
   bot = i
 
-  var socket = new WebSocket.Server({ port: 80 })
+  var socket = new WebSocket.Server({ port: 4256 })
   socket.on('connection', handleSocket)
   rtm.on(slack.RTM_EVENTS.MESSAGE, handleSlack)
 }
