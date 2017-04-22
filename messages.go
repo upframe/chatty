@@ -10,6 +10,15 @@ import (
 	"github.com/nlopes/slack"
 )
 
+func reply(message *slack.MessageEvent, text string) {
+	reply := rtm.NewOutgoingMessage(text, message.Channel)
+	if message.ThreadTimestamp != "" {
+		reply.ThreadTimestamp = message.ThreadTimestamp
+	}
+
+	rtm.SendMessage(reply)
+}
+
 // pingPong sends a ping/pong message using the same case of the sent one.
 // e.g.: "ping" -> "pong"; "PiNg" -> "PoNg"; and so on.
 func pingPong(message *slack.MessageEvent) {
@@ -31,12 +40,7 @@ func pingPong(message *slack.MessageEvent) {
 	}
 
 	answer = answer[:1] + replacement + answer[2:]
-
-	if message.Channel[0] != 'D' {
-		answer = "<@" + message.User + "> " + answer
-	}
-
-	rtm.SendMessage(rtm.NewOutgoingMessage(answer, message.Channel))
+	reply(message, answer)
 }
 
 // icndb is the Internet Chuck Norris Database API response type
@@ -70,7 +74,7 @@ func makeFunOfUser(message *slack.MessageEvent) {
 		return
 	}
 
-	rtm.SendMessage(rtm.NewOutgoingMessage(resp.Value.Joke, message.Channel))
+	reply(message, resp.Value.Joke)
 }
 
 type wdtt struct {
@@ -93,7 +97,7 @@ func whatDoesTrumpThink(message *slack.MessageEvent) {
 		return
 	}
 
-	rtm.SendMessage(rtm.NewOutgoingMessage(resp.Message, message.Channel))
+	reply(message, resp.Message)
 }
 
 var foxSayings = []string{
@@ -126,10 +130,5 @@ func whatDoesTheFoxSay(message *slack.MessageEvent) {
 	rand.Seed(time.Now().Unix())
 	id := rand.Intn(len(foxSayings) - 1)
 
-	msg := rtm.NewOutgoingMessage(foxSayings[id], message.Channel)
-	if message.ThreadTimestamp != "" {
-		msg.ThreadTimestamp = message.ThreadTimestamp
-	}
-
-	rtm.SendMessage(msg)
+	reply(message, foxSayings[id])
 }

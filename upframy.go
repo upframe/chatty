@@ -95,21 +95,20 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 	case strings.Contains(lowText, "what does the fox say"):
 		whatDoesTheFoxSay(ev)
 		return
+	case strings.Contains(lowText, "miguel gonçalves"):
+		reply(ev, `I'm not slackbot, but I know that if "Miguel Gonçalves" is mentioned again, this channel will be terminated!`)
+		return
 	}
 
 	var answer string
 
-	if !isDirectMessage {
-		answer = "<@" + ev.User + ">"
-	}
-
 	switch lowText {
 	case "fuck you":
-		answer += " Don't be evil :scream:"
+		answer = "Don't be evil :scream:"
 	case "hey", "hi", "hello", "hullo":
-		answer += " Hi there!"
+		answer = "Hi there!"
 	case "bye", "cya", "goodbye":
-		answer += " Bye! Gonna miss you :kissing:"
+		answer = "Bye! Gonna miss you :kissing:"
 	default:
 		if isDirectMessage {
 			answer = fmt.Sprintf("Sorry %s, I didn't quite understand what you just said :disappointed:", users[ev.User].FirstName)
@@ -118,7 +117,7 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 		}
 	}
 
-	rtm.SendMessage(rtm.NewOutgoingMessage(answer, ev.Channel))
+	reply(ev, answer)
 }
 
 var (
