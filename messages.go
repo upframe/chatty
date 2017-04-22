@@ -91,5 +91,5 @@ func whatDoesTrumpThink(message *slack.MessageEvent) {
 		return
 	}
 
-	rtm.SendMessage(rtm.NewOutgoingMessage(resp.message, message.Channel))
+	rtm.SendMessage(rtm.NewOutgoingMessage(resp.Message, message.Channel))
 }
