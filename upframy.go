@@ -82,8 +82,8 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 
 	lowText := strings.ToLower(ev.Text)
 
-	switch lowText {
-	case "ping", "pong":
+	switch {
+	case lowText == "ping", lowText == "pong":
 		pingPong(ev)
 		return
 	case strings.Contains(lowText, "tell me a joke"):
