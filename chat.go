@@ -15,7 +15,7 @@ var chatConnections = make(map[string]*websocket.Conn)
 func startChat() {
 	http.Handle("/", websocket.Handler(chatHandler))
 
-	if err := http.ListenAndServe(":1234", nil); err != nil {
+	if err := http.ListenAndServe(":4256", nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
