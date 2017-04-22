@@ -2,8 +2,10 @@ package upframy
 
 import (
 	"encoding/json"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/nlopes/slack"
 )
@@ -92,4 +94,42 @@ func whatDoesTrumpThink(message *slack.MessageEvent) {
 	}
 
 	rtm.SendMessage(rtm.NewOutgoingMessage(resp.message, message.Channel))
+}
+
+var foxSayings = []string{
+	`"Ring-ding-ding-ding-dingeringeding!
+Gering-ding-ding-ding-dingeringeding!
+Gering-ding-ding-ding-dingeringeding!"`,
+	`"Wa-pa-pa-pa-pa-pa-pow!
+Wa-pa-pa-pa-pa-pa-pow!
+Wa-pa-pa-pa-pa-pa-pow!"`,
+	`"Hatee-hatee-hatee-ho!
+Hatee-hatee-hatee-ho!
+Hatee-hatee-hatee-ho!"`,
+	`"Joff-tchoff-tchoffo-tchoffo-tchoff!
+Tchoff-tchoff-tchoffo-tchoffo-tchoff!
+Joff-tchoff-tchoffo-tchoffo-tchoff!"`,
+	`"Jacha-chacha-chacha-chow!
+Chacha-chacha-chacha-chow!
+Chacha-chacha-chacha-chow!"`,
+	`"Fraka-kaka-kaka-kaka-kow!
+Fraka-kaka-kaka-kaka-kow!
+Fraka-kaka-kaka-kaka-kow!"`,
+	`"A-hee-ahee ha-hee!
+A-hee-ahee ha-hee!
+A-hee-ahee ha-hee!"`,
+	`"A-oo-oo-oo-ooo!
+Woo-oo-oo-ooo!"`,
+}
+
+func whatDoesTheFoxSay(message *slack.MessageEvent) {
+	rand.Seed(time.Now().Unix())
+	id := rand.Intn(len(foxSayings) - 1)
+
+	msg := rtm.NewOutgoingMessage(foxSayings[id], message.Channel)
+	if message.ThreadTimestamp != "" {
+		msg.ThreadTimestamp = message.ThreadTimestamp
+	}
+
+	rtm.SendMessage(msg)
 }
