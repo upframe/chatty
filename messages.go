@@ -53,7 +53,7 @@ func makeFunOfUser(message *slack.MessageEvent) {
 	firstName := url.QueryEscape(users[message.User].FirstName)
 	lastName := url.QueryEscape(users[message.User].LastName)
 
-	link := "https://api.icndb.com/jokes/random?escape=javascript&firstName=" + firstName + "lastName=" + lastName
+	link := "https://api.icndb.com/jokes/random?escape=javascript&firstName=" + firstName + "&lastName=" + lastName
 
 	r, err := http.Get(link)
 	if err != nil {

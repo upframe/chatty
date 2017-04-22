@@ -58,8 +58,10 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 	}
 
 	if ev.Channel == chatChannel {
-		chatSlackHandler(ev)
-		return
+		// If this handler runs, the others musn't run.
+		if chatSlackHandler(ev) {
+			return
+		}
 	}
 
 	isDirectMessage := (ev.Channel[0] == 'D')

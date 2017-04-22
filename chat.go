@@ -63,14 +63,14 @@ func chatHandler(ws *websocket.Conn) {
 	rtm.SendMessage(msg)
 }
 
-func chatSlackHandler(ev *slack.MessageEvent) {
+func chatSlackHandler(ev *slack.MessageEvent) bool {
 	if ev.ThreadTimestamp == "" {
-		return
+		return false
 	}
 
 	conn, ok := chatConnections[ev.ThreadTimestamp]
 	if !ok {
-		return
+		return false
 	}
 
 	err := websocket.Message.Send(conn, ev.Text)
@@ -80,5 +80,8 @@ func chatSlackHandler(ev *slack.MessageEvent) {
 		msg := rtm.NewOutgoingMessage("*There was a problem delivering the message.*", chatChannel)
 		msg.ThreadTimestamp = ev.ThreadTimestamp
 		rtm.SendMessage(msg)
+		return false
 	}
+
+	return true
 }
