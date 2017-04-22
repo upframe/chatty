@@ -21,6 +21,7 @@ function pingPong (message) {
       break
     default:
       // Wut, what? This must not happen!
+      replacement = '(This is a bug! Literally!)'
   }
 
   answer = answer.substr(0, 1) + replacement + answer.substr(2)
