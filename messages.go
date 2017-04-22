@@ -70,3 +70,26 @@ func makeFunOfUser(message *slack.MessageEvent) {
 
 	rtm.SendMessage(rtm.NewOutgoingMessage(resp.Value.Joke, message.Channel))
 }
+
+type wdtt struct {
+	message string `json:"message"`
+}
+
+func whatDoesTrumpThink(message *slack.MessageEvent) {
+	link := "https://api.whatdoestrumpthink.com/api/v1/quotes/random"
+
+	r, err := http.Get(link)
+	if err != nil {
+		logger.Printf("Error on whatDoesTrumpThink: %v", err)
+		return
+	}
+	defer r.Body.Close()
+
+	resp := &wdtt{}
+	if err = json.NewDecoder(r.Body).Decode(resp); err != nil {
+		logger.Printf("Error on whatDoesTrumpThink: %v", err)
+		return
+	}
+
+	rtm.SendMessage(rtm.NewOutgoingMessage(resp.message, message.Channel))
+}

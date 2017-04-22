@@ -89,6 +89,9 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 	case "tell me a joke":
 		makeFunOfUser(ev)
 		return
+	case "what does trump think":
+		whatDoesTrumpThink(ev)
+		return
 	}
 
 	var answer string
