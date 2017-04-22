@@ -64,6 +64,12 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 		}
 	}
 
+	text := strings.ToLower(ev.Text)
+	if strings.Contains(text, "miguel gonçalves") {
+		reply(ev, `I'm not slackbot, but I know that if "Miguel Gonçalves" is mentioned again, this channel will be terminated!`)
+		return
+	}
+
 	isDirectMessage := (ev.Channel[0] == 'D')
 	isBotMentioned := strings.Contains(ev.Text, "<@"+bot+">")
 
@@ -80,29 +86,24 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 		ev.Text = strings.TrimSpace(ev.Text)
 	}
 
-	lowText := strings.ToLower(ev.Text)
-
 	switch {
-	case lowText == "ping", lowText == "pong":
+	case text == "ping", text == "pong":
 		pingPong(ev)
 		return
-	case strings.Contains(lowText, "tell me a joke"):
+	case strings.Contains(text, "tell me a joke"):
 		makeFunOfUser(ev)
 		return
-	case strings.Contains(lowText, "what does trump think"):
+	case strings.Contains(text, "what does trump think"):
 		whatDoesTrumpThink(ev)
 		return
-	case strings.Contains(lowText, "what does the fox say"):
+	case strings.Contains(text, "what does the fox say"):
 		whatDoesTheFoxSay(ev)
-		return
-	case strings.Contains(lowText, "miguel gonçalves"):
-		reply(ev, `I'm not slackbot, but I know that if "Miguel Gonçalves" is mentioned again, this channel will be terminated!`)
 		return
 	}
 
 	var answer string
 
-	switch lowText {
+	switch text {
 	case "fuck you":
 		answer = "Don't be evil :scream:"
 	case "hey", "hi", "hello", "hullo":
@@ -113,7 +114,7 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 		if isDirectMessage {
 			answer = fmt.Sprintf("Sorry %s, I didn't quite understand what you just said :disappointed:", users[ev.User].FirstName)
 		} else {
-			answer = "If you mention me again, I will break your nose " + answer + "!"
+			answer = fmt.Sprintf("If you mention me again, I will break your nose <@%s>!", ev.User)
 		}
 	}
 
