@@ -86,10 +86,10 @@ func handleMessageEvent(ev *slack.MessageEvent) {
 	case "ping", "pong":
 		pingPong(ev)
 		return
-	case "tell me a joke":
+	case strings.Contains(lowText, "tell me a joke"):
 		makeFunOfUser(ev)
 		return
-	case "what does trump think":
+	case strings.Contains(lowText, "what does trump think?"):
 		whatDoesTrumpThink(ev)
 		return
 	}

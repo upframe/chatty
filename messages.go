@@ -72,7 +72,7 @@ func makeFunOfUser(message *slack.MessageEvent) {
 }
 
 type wdtt struct {
-	message string `json:"message"`
+	Message string `json:"message"`
 }
 
 func whatDoesTrumpThink(message *slack.MessageEvent) {
