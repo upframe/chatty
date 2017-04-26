@@ -15,6 +15,7 @@ func Serve(c *chatty.Config) {
 
 	c.Router.HandleFunc("/setup", i(setup, c))
 	c.Router.HandleFunc("/events", i(events, c))
+	c.Router.HandleFunc("/interactive", i(interactive, c))
 
 	for _, team := range c.Teams {
 		team.Start(c)

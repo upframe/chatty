@@ -1,6 +1,7 @@
 package chatty
 
 import (
+	"net/http"
 	"sync"
 
 	"github.com/Sirupsen/logrus"
@@ -52,12 +53,79 @@ func (t *Team) Start(c *Config) {
 	t.Slack = slack.New(t.Token)
 	t.Logger = c.Logger
 	t.Connections = make(map[string]*websocket.Conn)
+
+	// TODO: if channel == "", send a message to choose the channel
+
 	c.Router.Handle(t.WebsocketURI, websocket.Handler(t.websocket))
 	c.Logger.Infof("Successfully started team %s on %s", t.ID, t.WebsocketURI)
 }
 
+func (t *Team) allowed(url string) bool {
+	for _, website := range t.Websites {
+		if website == url {
+			return true
+		}
+	}
+
+	// If it's not allowed, let's notify our dear team that
+	// someone from the outside tried to access the websocket
+	params := slack.PostMessageParameters{
+		Attachments: []slack.Attachment{
+			slack.Attachment{
+				Title:      "Website Approval",
+				Text:       "Do you wish to add <" + url + "> to the verified websites' list?",
+				Fallback:   "You are unable to either reject or accept.",
+				CallbackID: "accept_channel",
+				Color:      "#8BC34A",
+				Actions: []slack.AttachmentAction{
+					slack.AttachmentAction{
+						Name:  "approve",
+						Text:  "Approve",
+						Type:  "button",
+						Style: "primary",
+						Value: "true",
+						Confirm: &slack.ConfirmationField{
+							Title:       "Are you sure?",
+							Text:        "This will let *" + url + "* access your chat from now on.",
+							OkText:      "Yes",
+							DismissText: "No",
+						},
+					},
+					slack.AttachmentAction{
+						Name:  "approve",
+						Text:  "Reject",
+						Type:  "button",
+						Value: "false",
+						Confirm: &slack.ConfirmationField{
+							Title:       "Are you sure?",
+							Text:        "This will not let *" + url + "* access your chat.",
+							OkText:      "Yes",
+							DismissText: "No",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	text := "Someone tried to access your API websocket from a new URL. If it was you, click the button bellow to accept it and add this to the list of verified websites."
+	_, _, err := t.Slack.PostMessage(t.Channel, text, params)
+	if err != nil {
+		t.Logger.Errorf("can't post '%s' message for '%s' team", text, t.ID)
+	}
+
+	return false
+}
+
 // websocket is the handler for the socket that each team has.
 func (t *Team) websocket(ws *websocket.Conn) {
+	if !t.allowed(ws.RemoteAddr().String()) {
+		err := ws.WriteClose(http.StatusForbidden)
+		if err != nil {
+			t.Logger.Errorf("error closing the websocket %v", err)
+		}
+	}
+
 	var err error
 	var thread string
 
@@ -72,7 +140,7 @@ func (t *Team) websocket(ws *websocket.Conn) {
 		params := slack.PostMessageParameters{ThreadTimestamp: thread}
 		_, ts, err := t.Slack.PostMessage(t.Channel, reply, params)
 		if err != nil {
-			t.Logger.Errorf("Can't post '%s' message for '%s' team", reply, t.ID)
+			t.Logger.Errorf("can't post '%s' message for '%s' team", reply, t.ID)
 			break
 		}
 
@@ -82,9 +150,13 @@ func (t *Team) websocket(ws *websocket.Conn) {
 		}
 	}
 
+	if thread == "" {
+		return
+	}
+
 	params := slack.PostMessageParameters{ThreadTimestamp: thread}
 	_, _, err = t.Slack.PostMessage(t.Channel, exitMessage, params)
 	if err != nil {
-		t.Logger.Errorf("Can't post '%s' message for '%s' team", exitMessage, t.ID)
+		t.Logger.Errorf("can't post '%s' message for '%s' team", exitMessage, t.ID)
 	}
 }
