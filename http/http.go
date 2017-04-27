@@ -13,6 +13,7 @@ import (
 func Serve(c *chatty.Config) {
 	c.Router = mux.NewRouter()
 
+	c.Router.NotFoundHandler = &notFoundHandler{Config: c}
 	c.Router.HandleFunc("/setup", i(setup, c))
 	c.Router.HandleFunc("/events", i(events, c))
 	c.Router.HandleFunc("/interactive", i(interactive, c))
@@ -83,4 +84,17 @@ func i(h handler, c *chatty.Config) http.HandlerFunc {
 
 		code, err = h(w, r, c)
 	}
+}
+
+type notFoundHandler struct {
+	Config *chatty.Config
+}
+
+func (h *notFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	i(func(w http.ResponseWriter, r *http.Request, c *chatty.Config) (int, error) {
+		w.WriteHeader(404)
+		w.Write([]byte("no page for " + r.URL.String()))
+
+		return 0, nil
+	}, h.Config)(w, r)
 }
