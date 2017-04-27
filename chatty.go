@@ -71,14 +71,14 @@ func (t *Team) allowed(url string) bool {
 	// someone from the outside tried to access the websocket
 	params := slack.PostMessageParameters{
 		Attachments: []slack.Attachment{
-			slack.Attachment{
+			{
 				Title:      "Website Approval",
 				Text:       "Do you wish to add <" + url + "> to the verified websites' list?",
 				Fallback:   "You are unable to either reject or accept.",
 				CallbackID: "accept_channel",
 				Color:      "#8BC34A",
 				Actions: []slack.AttachmentAction{
-					slack.AttachmentAction{
+					{
 						Name:  "approve",
 						Text:  "Approve",
 						Type:  "button",
@@ -91,7 +91,7 @@ func (t *Team) allowed(url string) bool {
 							DismissText: "No",
 						},
 					},
-					slack.AttachmentAction{
+					{
 						Name:  "approve",
 						Text:  "Reject",
 						Type:  "button",
