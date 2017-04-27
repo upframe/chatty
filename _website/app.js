@@ -1,7 +1,7 @@
 'use strict'
 
 document.addEventListener('DOMContentLoaded', () => {
-  let conn = new window.WebSocket('ws://chatty.upframe.co/api/websocket/2de90faeba5091a93466cd5f5850085e')
+  let conn = new window.WebSocket('wss://chatty.upframe.co/api/websocket/2de90faeba5091a93466cd5f5850085e')
   let messages = document.getElementById('messages')
 
   conn.onopen = function () {
