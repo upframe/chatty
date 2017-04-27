@@ -22,8 +22,8 @@ func Serve(c *chatty.Config) {
 		team.Start(c)
 	}
 
-	c.Logger.Infof("Listening on port %s.", "80")
-	if err := http.ListenAndServe(":80", c.Router); err != nil {
+	c.Logger.Infof("Listening on port %s.", "1562")
+	if err := http.ListenAndServe(":1562", c.Router); err != nil {
 		c.Logger.Fatal(err)
 	}
 }
