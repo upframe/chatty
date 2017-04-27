@@ -3,37 +3,38 @@ package http
 import (
 	"net/http"
 
+	"github.com/nlopes/slack"
+
 	"github.com/upframe/chatty"
 )
 
-type action struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-	Type  string `json:"type"`
-}
-
-type interactiveMessage struct {
-	Actions    []action `json:"actions"`
-	CallbackID string   `json:"callback_id"`
-	Team       struct {
-		ID     string `json:"id"`
-		Domain string `json:"domain"`
-	} `json:"team"`
-	Channel struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-	} `json:"channel"`
-	User struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-	} `json:"user"`
-	ActionTS    string `json:"action_ts"`
-	MessageTS   string `json:"message_ts"`
-	Token       string `json:"token"`
-	ResponseURL string `json:"response_url"`
-}
-
 func interactive(w http.ResponseWriter, r *http.Request, c *chatty.Config) (int, error) {
+	action := &slack.AttachmentActionCallback{}
+
+	err := json.NewDecoder(r.Body).Decode(action)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	if action.Token != c.VerificationToken {
+		return 0, nil
+	}
+
+	if _, ok := c.Teams[action.Team.ID]; !ok {
+		return 0, nil
+	}
+
+	if action.CallbackID != "accept_channel" {
+		return 0, nil
+	}
+
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
+
+	// TODO: finish proccessing
+
+	team := c.Teams[action.Team.ID]
+	team.Websites = append(team.Websites, action.Actions[0].Value)
 
 	return 0, nil
 }
