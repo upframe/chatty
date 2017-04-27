@@ -6,19 +6,20 @@ import (
 	"net/http"
 
 	"golang.org/x/net/websocket"
+	"github.com/nlopes/slack"
 
 	"github.com/upframe/chatty"
 )
 
 type teste struct {
-	Token     string          `json:"token"`
-	Type      string          `json:"type"`
-	Challenge string          `json:"challenge"`
-	Team      string          `json:"team_id"`
-	APIAppID  string          `json:"api_app_id"`
-	Event     *chatty.Message `json:"event"`
-	EventID   string          `json:"event_id"`
-	EventTime int             `json:"event_time"`
+	Token     string        `json:"token"`
+	Type      string        `json:"type"`
+	Challenge string 	`json:"challenge"`
+	Team      string	`json:"team_id"`
+	APIAppID  string	`json:"api_app_id"`
+	Event     *slack.Msg	`json:"event"`
+	EventID   string        `json:"event_id"`
+	EventTime int           `json:"event_time"`
 }
 
 func events(w http.ResponseWriter, r *http.Request, c *chatty.Config) (int, error) {
