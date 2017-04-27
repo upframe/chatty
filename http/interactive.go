@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/nlopes/slack"
@@ -9,10 +10,13 @@ import (
 	"github.com/upframe/chatty"
 )
 
+// NOTE: if in the future we start having problems with non-received messages
+// we must start using action.ResponseURL to send instead of writing directly.
+
 func interactive(w http.ResponseWriter, r *http.Request, c *chatty.Config) (int, error) {
 	action := &slack.AttachmentActionCallback{}
 
-	err := json.NewDecoder(r.Body).Decode(action)
+	err := json.Unmarshal([]byte(r.PostFormValue("payload")), action)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -32,10 +36,18 @@ func interactive(w http.ResponseWriter, r *http.Request, c *chatty.Config) (int,
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
 
-	// TODO: finish proccessing
+	if len(action.Actions) == 0 {
+		return http.StatusBadRequest, errors.New("missing action")
+	}
+
+	if action.Actions[0].Value == "" {
+		w.Write([]byte("You've rejected this website approval request."))
+		return 0, nil
+	}
 
 	team := c.Teams[action.Team.ID]
 	team.Websites = append(team.Websites, action.Actions[0].Value)
 
+	w.Write([]byte("You've approved this website approval request."))
 	return 0, nil
 }

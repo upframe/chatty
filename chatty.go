@@ -54,8 +54,6 @@ func (t *Team) Start(c *Config) {
 	t.Logger = c.Logger
 	t.Connections = make(map[string]*websocket.Conn)
 
-	// TODO: if channel == "", send a message to choose the channel
-
 	c.Router.Handle(t.WebsocketURI, websocket.Handler(t.websocket))
 	c.Logger.Infof("Successfully started team %s on %s", t.ID, t.WebsocketURI)
 }
@@ -83,7 +81,7 @@ func (t *Team) allowed(url string) bool {
 						Text:  "Approve",
 						Type:  "button",
 						Style: "primary",
-						Value: "true",
+						Value: url,
 						Confirm: &slack.ConfirmationField{
 							Title:       "Are you sure?",
 							Text:        "This will let *" + url + "* access your chat from now on.",
@@ -95,7 +93,7 @@ func (t *Team) allowed(url string) bool {
 						Name:  "approve",
 						Text:  "Reject",
 						Type:  "button",
-						Value: "false",
+						Value: "",
 						Confirm: &slack.ConfirmationField{
 							Title:       "Are you sure?",
 							Text:        "This will not let *" + url + "* access your chat.",

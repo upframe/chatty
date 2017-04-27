@@ -16,6 +16,7 @@ func Serve(c *chatty.Config) {
 	c.Router.HandleFunc("/setup", i(setup, c))
 	c.Router.HandleFunc("/events", i(events, c))
 	c.Router.HandleFunc("/interactive", i(interactive, c))
+	c.Router.HandleFunc("/command", i(command, c))
 
 	for _, team := range c.Teams {
 		team.Start(c)
@@ -62,7 +63,7 @@ func i(h handler, c *chatty.Config) http.HandlerFunc {
 			}
 
 			if code >= 400 && err != nil {
-				c.Logger.Print(err)
+				c.Logger.Error(err)
 			}
 
 			if code != 0 {

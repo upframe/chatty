@@ -11,7 +11,7 @@ import (
 	"github.com/upframe/chatty"
 )
 
-type teste struct {
+type event struct {
 	Token     string     `json:"token"`
 	Type      string     `json:"type"`
 	Challenge string     `json:"challenge"`
@@ -23,7 +23,7 @@ type teste struct {
 }
 
 func events(w http.ResponseWriter, r *http.Request, c *chatty.Config) (int, error) {
-	info := &teste{}
+	info := &event{}
 
 	err := json.NewDecoder(r.Body).Decode(info)
 	if err != nil {
@@ -38,8 +38,6 @@ func events(w http.ResponseWriter, r *http.Request, c *chatty.Config) (int, erro
 	if info.Token != c.VerificationToken {
 		return 0, nil
 	}
-
-	fmt.Println(info.Event)
 
 	if _, ok := c.Teams[info.Team]; !ok {
 		return 0, nil
