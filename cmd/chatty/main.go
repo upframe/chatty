@@ -35,19 +35,18 @@ func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	err := boltdb.Setup("database.db")
-	if err != nil {
-		panic(err)
-	}
-
-	f := &config{}
-
 	configFile, err := os.Open(configPath)
 	if err != nil {
 		panic(err)
 	}
 
+	f := &config{}
 	err = json.NewDecoder(configFile).Decode(&f)
+	if err != nil {
+		panic(err)
+	}
+
+	err = boltdb.Setup(f.Database)
 	if err != nil {
 		panic(err)
 	}
