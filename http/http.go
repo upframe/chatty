@@ -14,11 +14,10 @@ func Serve(c *chatty.Config) {
 	c.Router = mux.NewRouter()
 
 	c.Router.NotFoundHandler = &notFoundHandler{Config: c}
-	// TODO: remove "/api" when Caddy fixes the proxy issue
-	c.Router.HandleFunc("/api/setup", i(setup, c))
-	c.Router.HandleFunc("/api/events", i(events, c))
-	c.Router.HandleFunc("/api/interactive", i(interactive, c))
-	c.Router.HandleFunc("/api/command", i(command, c))
+	c.Router.HandleFunc("/setup", i(setup, c))
+	c.Router.HandleFunc("/events", i(events, c))
+	c.Router.HandleFunc("/interactive", i(interactive, c))
+	c.Router.HandleFunc("/command", i(command, c))
 
 	for _, team := range c.Teams {
 		team.Start(c)
